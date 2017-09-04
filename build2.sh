@@ -185,10 +185,6 @@ cd win32/z88dk
 check_result
 make 
 check_result
-stage="Configure cfg files for win32"
-#./config.sh $PREFIX z88
-cp lib/config/z88.cfg lib/config/zcc.cfg
-#check_result
 sed -i "s/COPYCMD.*/COPYCMD\t\tcopy/g" lib/config/*.cfg
 sed -i s,/,\\\\,g lib/config/*.cfg
 check_result
@@ -278,10 +274,6 @@ cd osx/z88dk
 check_result
 make 
 check_result
-stage="Configure cfg files for osx"
-#./config.sh $PREFIX z88
-cp lib/config/z88.cfg lib/config/zcc.cfg
-#check_result
 # Remove intermediates
 stage="Cleaning intermediate files"
 make clean-bins
@@ -301,6 +293,8 @@ check_result
 # Copy libs
 stage="Copying libraries into osx kit"
 cp ../../build/z88dk/lib/clibs/*.lib lib/clibs
+check_result
+cp ../../build/z88dk/src/z80asm/z80asm-*.lib lib/
 check_result
 cp -r  ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sccz80 libsrc/_DEVELOPMENT/lib/
 check_result
