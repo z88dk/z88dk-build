@@ -138,7 +138,7 @@ stage="Copying libraries into tarball with libraries"
 cd build_with_libs/z88dk
 cp ../../build/z88dk/lib/clibs/*.lib lib/clibs
 check_result
-cp ../../build/z88dk/src/z80asm/z80asm.lib lib/
+cp ../../build/z88dk/src/z80asm/z80asm-*.lib lib/
 check_result
 cp -r ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sccz80 libsrc/_DEVELOPMENT/lib/
 check_result
@@ -179,7 +179,7 @@ export EXESUFFIX=".exe"
 export PKG_CONFIG_PATH=/usr/i686-w64-mingw32/lib/pkgconfig/
 export XML2CONFIG=/usr/i686-w64-mingw32/bin/xml2-config
 
-cp build/z88dk/src/z80asm/z80asm.lib win32/z88dk/src/z80asm/
+cp build/z88dk/src/z80asm/z80asm-*.lib win32/z88dk/src/z80asm/
 check_result
 
 
@@ -223,7 +223,7 @@ check_result
 stage="Copying libraries into win32 kit"
 cp ../../build/z88dk/lib/clibs/*.lib lib/clibs
 check_result
-cp ../../build/z88dk/src/z80asm/z80asm.lib lib/
+cp ../../build/z88dk/src/z80asm/z80asm-*.lib lib/
 check_result
 cp -r ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sccz80 libsrc/_DEVELOPMENT/lib/
 check_result
@@ -264,7 +264,7 @@ stage="OSX build"
 tar xzf kits/z88dk-src-$date-$revision.tgz -C osx
 check_result
 
-cp build/z88dk/lib/z80asm.lib osx/z88dk/src/z80asm/
+cp build/z88dk/lib/z80asm-*.lib osx/z88dk/src/z80asm/
 check_result
 
 # Build some mac binaries
