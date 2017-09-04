@@ -179,9 +179,6 @@ export EXESUFFIX=".exe"
 export PKG_CONFIG_PATH=/usr/i686-w64-mingw32/lib/pkgconfig/
 export XML2CONFIG=/usr/i686-w64-mingw32/bin/xml2-config
 
-cp build/z88dk/src/z80asm/z80asm-*.lib win32/z88dk/src/z80asm/
-check_result
-
 
 # And build
 cd win32/z88dk
@@ -264,8 +261,6 @@ stage="OSX build"
 tar xzf kits/z88dk-src-$date-$revision.tgz -C osx
 check_result
 
-cp build/z88dk/lib/z80asm-*.lib osx/z88dk/src/z80asm/
-check_result
 
 # Build some mac binaries
 
