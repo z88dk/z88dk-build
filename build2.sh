@@ -72,6 +72,8 @@ git fetch
 check_result
 git pull
 check_result
+git submodule update --init --recursive
+check_result
 
 stage="Encoding version"
 make setup
