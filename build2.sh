@@ -115,9 +115,8 @@ export LDFLAGS=$CFLAGS
 export CC=gcc
 export ZCCCFG=`pwd`/lib/config/
 export Z80_OZFILES=`pwd`/lib/
-make
 export PATH=`pwd`/bin:$PATH
-make && make -C libsrc clean && make -C libsrc && make -C libsrc install && make -C libsrc/_DEVELOPMENT && make -C examples
+./build.sh -t -e
 check_result
 
 
@@ -145,6 +144,8 @@ check_result
 cp -r ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sccz80 libsrc/_DEVELOPMENT/lib/
 check_result
 cp -r ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sdcc* libsrc/_DEVELOPMENT/lib/
+check_result
+rsync -a ../../build/z88dk/include/ include/
 check_result
 rsync -a ../../build/z88dk/libsrc/_DEVELOPMENT/target/ libsrc/_DEVELOPMENT/target/
 check_result
@@ -227,6 +228,8 @@ cp -r ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sccz80 libsrc/_DEVELOPMENT/lib/
 check_result
 cp -r ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sdcc* libsrc/_DEVELOPMENT/lib/
 check_result
+rsync -a ../../build/z88dk/include/ include/
+check_result
 rsync -a ../../build/z88dk/libsrc/_DEVELOPMENT/target/ libsrc/_DEVELOPMENT/target/
 check_result
 
@@ -307,6 +310,8 @@ check_result
 cp -r  ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sccz80 libsrc/_DEVELOPMENT/lib/
 check_result
 cp -r  ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sdcc* libsrc/_DEVELOPMENT/lib/
+check_result
+rsync -a ../../build/z88dk/include/ include/
 check_result
 rsync -a ../../build/z88dk/libsrc/_DEVELOPMENT/target/ libsrc/_DEVELOPMENT/target/
 check_result
