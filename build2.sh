@@ -171,8 +171,14 @@ stage="Win32 build"
 tar xzf kits/z88dk-src-$date-$revision.tgz -C win32
 check_result
 
+# Copying sdcc
+stage="Copying sdcc into win32 kit"
+cp bin/win32/* win32/z88dk/bin/
+check_result
+
 # Build some mingw binaries
 
+stage="Build windows binaries"
 # Set some required variables
 export CFLAGS="-g -O2"
 export CC="i686-w64-mingw32-gcc"
@@ -213,10 +219,6 @@ check_result
 cp /usr/i686-w64-mingw32/bin/liblzma-5.dll bin
 check_result
 
-# Copying sdcc
-stage="Copying sdcc into win32 kit"
-cp ../../bin/win32/* bin/
-check_result
 
 # Copy libs
 stage="Copying libraries into win32 kit"
@@ -265,9 +267,13 @@ stage="OSX build"
 tar xzf kits/z88dk-src-$date-$revision.tgz -C osx
 check_result
 
+stage="Copying sdcc into osx kit"
+cp bin/osx/* osx/z88dk/bin/
+check_result
 
 # Build some mac binaries
 
+stage="Build MacOS binaries"
 # Set some required variables
 export CFLAGS="-g -O2"
 export CC="i386-apple-darwin15-cc"
