@@ -60,6 +60,30 @@ mkdir -p kits
 rm -fr kits/*
 
 
+# Install Perl prerequisites
+echo "#########################################################################"
+echo
+echo "Install Perl prerequisites"
+echo
+echo "#########################################################################"
+
+# bootstrap local::lib environment to instal Perl modules in ~/perl5
+export PATH="$HOME/perl5/bin:$PATH"
+export PERL5LIB="$HOME/perl5/lib/perl5:$PERL5LIB"
+export PERL_LOCAL_LIB_ROOT="$HOME/perl5:$PERL_LOCAL_LIB_ROOT"
+export PERL_MB_OPT="--install_base \"$HOME/perl5\""
+export PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
+cpan local::lib
+check_result
+
+# setup environment for installed local::lib
+eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
+
+# install/update Perl dependencies
+cpan App::Prove Capture::Tiny::Extended CPU::Z80::Assembler Data::HexDump File::Path List::Uniq Modern::Perl Object::Tiny::RW Test::Cmd Test::Cmd::Common Test::Harness Test::HexDifferences Text::Table YAML::Tiny
+check_result
+
+
 # Create a cvs tarball
 echo "#########################################################################"
 echo
