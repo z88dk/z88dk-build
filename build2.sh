@@ -54,6 +54,13 @@ echo "#########################################################################"
 cwd=`pwd`
 date=`date +%Y%m%d`
 
+PERL5LIB=/home/build/perl5/lib/perl5
+export PERL5LIB
+
+PATH=/home/build/perl5/bin:$PATH
+export PATH
+
+
 trap "onexit" EXIT
 
 mkdir -p kits
@@ -76,7 +83,8 @@ git submodule update --init --recursive
 check_result
 
 stage="Encoding version"
-make setup
+rm -f src/config.h
+make src/config.h
 check_result
 
 hash=`git rev-parse --short HEAD`
@@ -116,8 +124,11 @@ export CC=gcc
 export ZCCCFG=`pwd`/lib/config/
 export Z80_OZFILES=`pwd`/lib/
 export PATH=`pwd`/bin:$PATH
-./build.sh -t -e
+./build.sh 
 check_result
+make -C libsrc/_DEVELOPMENT install-clean
+check_result
+
 
 
 # Back to where we where
@@ -137,9 +148,9 @@ tar xzf kits/z88dk-src-$date-$revision.tgz -C build_with_libs
 
 stage="Copying libraries into tarball with libraries"
 cd build_with_libs/z88dk
-cp ../../build/z88dk/lib/clibs/*.lib lib/clibs
+rsync -a ../../build/z88dk/lib/clibs/ lib/clibs
 check_result
-cp ../../build/z88dk/src/z80asm/z80asm-*.lib lib/
+cp ../../build/z88dk/src/z80asm/z88dk-z80asm-*.lib lib/
 check_result
 cp -r ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sccz80 libsrc/_DEVELOPMENT/lib/
 check_result
@@ -172,7 +183,7 @@ tar xzf kits/z88dk-src-$date-$revision.tgz -C win32
 check_result
 
 # Copying sdcc
-stage="Copying sdcc into win32 kit"
+stage="Copying sdcc + libs into win32 kit"
 cp bin/win32/* win32/z88dk/bin/
 check_result
 
@@ -181,20 +192,24 @@ check_result
 stage="Build windows binaries"
 # Set some required variables
 export CFLAGS="-g -O2"
-export CC="i686-w64-mingw32-gcc"
+export CC="x86_64-w64-mingw32-gcc"
+export CXX="x86_64-w64-mingw32-g++"
 export PREFIX="c:/z88dk/"
 export CROSS=1
 export EXESUFFIX=".exe"
-export PKG_CONFIG_PATH=/usr/i686-w64-mingw32/lib/pkgconfig/
-export XML2CONFIG=/usr/i686-w64-mingw32/bin/xml2-config
+export PKG_CONFIG_PATH=/usr/x86_64-w64-mingw32/lib/pkgconfig/
+export XML2CONFIG=/usr/x86_64-w64-mingw32/bin/xml2-config
+echo "#undef PREFIX" >> win32/z88dk/src/config.h
+echo "#define PREFIX \"$PREFIX\"" >> win32/z88dk/src/config.h
 
-cp build/z88dk/src/z80asm/z80asm-*.lib win32/z88dk/src/z80asm/dev/z80asm_lib
+cp build/z88dk/src/z80asm/z88dk-z80asm-*.lib win32/z88dk/src/z80asm/dev/z80asm_lib
 check_result
 
 
 # And build
 cd win32/z88dk
 check_result
+touch bin/zsdcc.exe
 make 
 check_result
 sed -i "s/COPYCMD.*/COPYCMD\t\tcopy/g" lib/config/*.cfg
@@ -202,29 +217,46 @@ sed -i s,/,\\\\,g lib/config/*.cfg
 check_result
 # Remove intermediates
 stage="Cleaning intermediate files"
-make clean-bins
+make bins-clean
 check_result
 
-# Copy dependencies
-stage="Copying dependencies into win32 kit"
-cp /usr/i686-w64-mingw32/bin/intl.dll bin/
+stage="Build i686 windows binaries"
+cp ../../build/z88dk/src/z80asm/z88dk-z80asm-*.lib src/z80asm/dev/z80asm_lib
 check_result
-#cp /usr/i686-w64-mingw32/bin/libglib-2.0-0.dll bin/
-cp /usr/i686-w64-mingw32/bin/libxml2-2.dll bin/
+# Now, build the i686 versions
+mv bin bin.x86-64
+mkdir bin
+export CFLAGS="-g -O2"
+export CC="i686-w64-mingw32-gcc"
+export CXX="i686-w64-mingw32-g++"
+export PREFIX="c:/z88dk/"
+export CROSS=1
+export EXESUFFIX=".exe"
+export PKG_CONFIG_PATH=/usr/i686-w64-mingw32/lib/pkgconfig/
+export XML2CONFIG=/usr/i686-w64-mingw32/bin/xml2-config
+make 
 check_result
-cp /usr/i686-w64-mingw32/bin/zlib1.dll bin
+
+stage="Cleaning intermediate files"
+make bins-clean
 check_result
-cp /usr/i686-w64-mingw32/bin/libiconv-2.dll bin
+
+stage="Copying i686 sdcc + libs into win32 kit"
+cp ../../bin/win32.i686/* bin/
 check_result
-cp /usr/i686-w64-mingw32/bin/liblzma-5.dll bin
-check_result
+
+# And now rearrange the binary folds
+mv bin bin.x86
+mv bin.x86-64 bin
+
+
 
 
 # Copy libs
 stage="Copying libraries into win32 kit"
-cp ../../build/z88dk/lib/clibs/*.lib lib/clibs
+rsync -a ../../build/z88dk/lib/clibs/ lib/clibs
 check_result
-cp ../../build/z88dk/src/z80asm/z80asm-*.lib lib/
+cp ../../build/z88dk/src/z80asm/z88dk-z80asm-*.lib lib/
 check_result
 cp -r ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sccz80 libsrc/_DEVELOPMENT/lib/
 check_result
@@ -243,7 +275,7 @@ echo "Building win32 kit"
 echo
 echo "#########################################################################"
 stage="win32 zip"
-zip -qr ../kits/z88dk-win32-$date-$revision.zip z88dk
+zip -qr9 ../kits/z88dk-win32-$date-$revision.zip z88dk
 check_result
 
 
@@ -275,15 +307,19 @@ check_result
 
 stage="Build MacOS binaries"
 # Set some required variables
-export CFLAGS="-g -O2"
-export CC="i386-apple-darwin15-cc"
+export CFLAGS="-g -O2 -arch x86_64 -arch arm64 -mmacosx-version-min=10.10"
+export CXX_FLAGS="-g -O2 -arch x86_64 -arch arm64 -mmacosx-version-min=10.10 -I/opt/osxcross/macports/pkgs/opt/local/libexec/boost/1.76/include/boost"
+export LDFLAGS="-g -O2 -arch x86_64 -arch arm64 -L/opt/osxcross/macports/pkgs/opt/local/libexec/boost/1.76/lib"
+export CC="x86_64-apple-darwin20.2-cc"
+export CXX="x86_64-apple-darwin20.2-c++"
 export PREFIX="/usr/local/"
 export EXESUFFIX=""
 export CROSS=1
-export PATH=/opt/osxcross/target/bin:$PATH
-export XML2CONFIG=/opt/osxcross/target/bin/xml2-config
+export PATH=/opt/osxcross/bin:$PATH
+export XML2CONFIG=/opt/osxcross/SDK/MacOSX11.1.sdk/usr/bin/xml2-config
+export USE_BOOST_FILESYSTEM=1
 
-cp build/z88dk/lib/z80asm-*.lib osx/z88dk/src/z80asm/dev/z80asm_lib/
+cp build/z88dk/lib/z88dk-z80asm-*.lib osx/z88dk/src/z80asm/dev/z80asm_lib/
 check_result
 
 # And build
@@ -293,10 +329,9 @@ make
 check_result
 # Remove intermediates
 stage="Cleaning intermediate files"
-make clean-bins
+make bins-clean
 check_result
 
-# Copy dependencies
 stage="Copying dependencies into osx kit"
 #cp /opt/gtk-macosx/lib/libglib-2.0.dylib bin/libglib-2.0.0.dylib
 #check_result
@@ -307,11 +342,23 @@ stage="Copying sdcc into osx kit"
 cp ../../bin/osx/* bin/
 check_result
 
+# Remove z80asm or codesigning is a bit weird
+rm -f bin/z80asm
+
+stage="Code signing for MacOS"
+for file in `file bin/* | grep Mach-O | awk '{print $1}' | sed s,:,,`; do
+ echo "Code signing $file"
+ rcodesign sign --p12-file $HOME/certs/domdev.p12 --p12-password-file $HOME/certs/password --code-signature-flags runtime $file
+ check_result
+done
+
+# Copy dependencies
+
 # Copy libs
 stage="Copying libraries into osx kit"
 cp ../../build/z88dk/lib/clibs/*.lib lib/clibs
 check_result
-cp ../../build/z88dk/src/z80asm/z80asm-*.lib lib/
+cp ../../build/z88dk/src/z80asm/z88dk-z80asm-*.lib lib/
 check_result
 cp -r  ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sccz80 libsrc/_DEVELOPMENT/lib/
 check_result
@@ -330,7 +377,7 @@ echo "Building osx kit"
 echo
 echo "#########################################################################"
 stage="osx zip"
-zip -qr ../kits/z88dk-osx-$date-$revision.zip z88dk
+zip -qr9 ../kits/z88dk-osx-$date-$revision.zip z88dk
 
 
 cd $cwd/kits
