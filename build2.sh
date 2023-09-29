@@ -150,7 +150,7 @@ stage="Copying libraries into tarball with libraries"
 cd build_with_libs/z88dk
 rsync -a ../../build/z88dk/lib/clibs/ lib/clibs
 check_result
-cp ../../build/z88dk/src/z80asm/z88dk-z80asm-*.lib lib/
+cp ../../build/z88dk/src/z80asm/z88dk-z80asm.lib lib/
 check_result
 cp -r ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sccz80 libsrc/_DEVELOPMENT/lib/
 check_result
@@ -202,7 +202,7 @@ export XML2CONFIG=/usr/x86_64-w64-mingw32/bin/xml2-config
 echo "#undef PREFIX" >> win32/z88dk/src/config.h
 echo "#define PREFIX \"$PREFIX\"" >> win32/z88dk/src/config.h
 
-cp build/z88dk/src/z80asm/z88dk-z80asm-*.lib win32/z88dk/src/z80asm/dev/z80asm_lib
+cp build/z88dk/src/z80asm/z88dk-z80asm.lib win32/z88dk/src/z80asm/dev/z80asm_lib
 check_result
 
 
@@ -221,7 +221,7 @@ make bins-clean
 check_result
 
 stage="Build i686 windows binaries"
-cp ../../build/z88dk/src/z80asm/z88dk-z80asm-*.lib src/z80asm/dev/z80asm_lib
+cp ../../build/z88dk/src/z80asm/z88dk-z80asm.lib src/z80asm/dev/z80asm_lib
 check_result
 # Now, build the i686 versions
 mv bin bin.x86-64
@@ -256,7 +256,7 @@ mv bin.x86-64 bin
 stage="Copying libraries into win32 kit"
 rsync -a ../../build/z88dk/lib/clibs/ lib/clibs
 check_result
-cp ../../build/z88dk/src/z80asm/z88dk-z80asm-*.lib lib/
+cp ../../build/z88dk/src/z80asm/z88dk-z80asm.lib lib/
 check_result
 cp -r ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sccz80 libsrc/_DEVELOPMENT/lib/
 check_result
@@ -308,7 +308,8 @@ check_result
 stage="Build MacOS binaries"
 # Set some required variables
 export CFLAGS="-g -O2 -arch x86_64 -arch arm64 -mmacosx-version-min=10.10"
-export CXX_FLAGS="-g -O2 -arch x86_64 -arch arm64 -mmacosx-version-min=10.10 -I/opt/osxcross/macports/pkgs/opt/local/libexec/boost/1.76/include/boost"
+export CXX_FLAGS="-g -O2 -arch x86_64 -arch arm64 -mmacosx-version-min=10.10 -I/opt/osxcross/macports/pkgs/opt/local/libexec/boost/1.76/include"
+export CXXFLAGS=$CXX_FLAGS
 export LDFLAGS="-g -O2 -arch x86_64 -arch arm64 -L/opt/osxcross/macports/pkgs/opt/local/libexec/boost/1.76/lib"
 export CC="x86_64-apple-darwin20.2-cc"
 export CXX="x86_64-apple-darwin20.2-c++"
@@ -319,7 +320,7 @@ export PATH=/opt/osxcross/bin:$PATH
 export XML2CONFIG=/opt/osxcross/SDK/MacOSX11.1.sdk/usr/bin/xml2-config
 export USE_BOOST_FILESYSTEM=1
 
-cp build/z88dk/lib/z88dk-z80asm-*.lib osx/z88dk/src/z80asm/dev/z80asm_lib/
+cp build/z88dk/lib/z88dk-z80asm.lib osx/z88dk/src/z80asm/dev/z80asm_lib/
 check_result
 
 # And build
@@ -358,7 +359,7 @@ done
 stage="Copying libraries into osx kit"
 cp ../../build/z88dk/lib/clibs/*.lib lib/clibs
 check_result
-cp ../../build/z88dk/src/z80asm/z88dk-z80asm-*.lib lib/
+cp ../../build/z88dk/src/z80asm/z88dk-z80asm.lib lib/
 check_result
 cp -r  ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sccz80 libsrc/_DEVELOPMENT/lib/
 check_result
@@ -378,6 +379,14 @@ echo
 echo "#########################################################################"
 stage="osx zip"
 zip -qr9 ../kits/z88dk-osx-$date-$revision.zip z88dk
+
+echo "#########################################################################"
+echo
+echo "Notarising osx kit"
+echo
+echo "#########################################################################"
+stage="notarise"
+rcodesign notary-submit --api-key-path ~/certs/appstore.json --wait ../kits/z88dk-osx-$date-$revision.zip
 
 
 cd $cwd/kits
