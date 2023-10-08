@@ -39,6 +39,9 @@ function onexit
          if [ -f z88dk-osx-$date-$revision.zip ]; then
              ln -s z88dk-osx-$date-$revision.zip z88dk-osx-latest.zip
          fi
+         if [ -f z88dk-atari-mint-$date-$revision.zip ]; then
+             ln -s z88dk-atari-mint-$date-$revision.zip z88dk-atari-mint-latest.zip
+         fi
      fi
 echo "#########################################################################"
 echo
@@ -119,6 +122,8 @@ check_result
 cd build/z88dk
 check_result
 export CFLAGS="-g -O2"
+export CXX_FLAGS=""
+export CXXFLAGS=""
 export LDFLAGS=$CFLAGS
 export CC=gcc
 export ZCCCFG=`pwd`/lib/config/
@@ -167,6 +172,83 @@ tar czf ../kits/z88dk-$date-$revision.tgz z88dk
 check_result
 cd $cwd
 
+echo "#########################################################################"
+echo
+echo "Starting atari-mint build"
+echo
+echo "#########################################################################"
+rm -fr mint
+mkdir -p mint
+stage="Atari Mint build"
+# Extract the fresh tarball
+tar xzf kits/z88dk-src-$date-$revision.tgz -C mint
+check_result
+
+
+# Build some mint binaries
+
+stage="Build Mint binaries"
+# Set some required variables
+export CFLAGS="-O2 -fomit-frame-pointer -m68020-60"
+export CXX_FLAGS="-O2 -fomit-frame-pointer -m68020-60"
+export CXXFLAGS=$CXX_FLAGS
+export LDFLAGS="-g -O2"
+export CC="m68k-atari-mint-gcc"
+export CXX="m68k-atari-mint-g++"
+export PREFIX="/usr/local/"
+export EXESUFFIX=""
+export CROSS=1
+export PKG_CONFIG_PATH=/usr/m68k-atari-mint/sys-root/usr/lib/pkgconfig/
+
+cp build/z88dk/lib/z88dk-z80asm.lib mint/z88dk/src/z80asm/dev/z80asm_lib/
+check_result
+
+# And build
+cd mint/z88dk
+check_result
+make 
+check_result
+# Remove intermediates
+stage="Cleaning intermediate files"
+make bins-clean
+check_result
+
+stage="Copying sdcc into mint kit"
+cp bin/mint/* mint/z88dk/bin/
+#check_result
+
+
+# Copy dependencies
+
+# Copy libs
+stage="Copying libraries into mint kit"
+cp ../../build/z88dk/lib/clibs/*.lib lib/clibs
+check_result
+cp ../../build/z88dk/src/z80asm/z88dk-z80asm.lib lib/
+check_result
+cp -r  ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sccz80 libsrc/_DEVELOPMENT/lib/
+check_result
+cp -r  ../../build/z88dk/libsrc/_DEVELOPMENT/lib/sdcc* libsrc/_DEVELOPMENT/lib/
+check_result
+rsync -a ../../build/z88dk/include/ include/
+check_result
+rsync -a ../../build/z88dk/libsrc/_DEVELOPMENT/target/ libsrc/_DEVELOPMENT/target/
+check_result
+
+cd ..
+check_result
+echo "#########################################################################"
+echo
+echo "Building mint kit"
+echo
+echo "#########################################################################"
+stage="mint zip"
+zip -qr9 ../kits/z88dk-atari-mint-$date-$revision.zip z88dk
+
+
+# Back to where we where
+cd $cwd
+
 # Now create a mingw build
 
 echo "#########################################################################"
@@ -194,6 +276,8 @@ stage="Build windows binaries"
 export CFLAGS="-g -O2"
 export CC="x86_64-w64-mingw32-gcc"
 export CXX="x86_64-w64-mingw32-g++"
+export CXX_FLAGS=""
+export CXXFLAGS=""
 export PREFIX="c:/z88dk/"
 export CROSS=1
 export EXESUFFIX=".exe"
@@ -229,6 +313,8 @@ mkdir bin
 export CFLAGS="-g -O2"
 export CC="i686-w64-mingw32-gcc"
 export CXX="i686-w64-mingw32-g++"
+export CXX_FLAGS=""
+export CXXFLAGS=""
 export PREFIX="c:/z88dk/"
 export CROSS=1
 export EXESUFFIX=".exe"
@@ -317,6 +403,8 @@ export PREFIX="/usr/local/"
 export EXESUFFIX=""
 export CROSS=1
 export PATH=/opt/osxcross/bin:$PATH
+# The libxml-2.0.pc file was manually added to this location
+export PKG_CONFIG_PATH=/opt/osxcross/SDK/MacOSX11.1.sdk/usr/lib/pkgconfig
 export XML2CONFIG=/opt/osxcross/SDK/MacOSX11.1.sdk/usr/bin/xml2-config
 export USE_BOOST_FILESYSTEM=1
 
