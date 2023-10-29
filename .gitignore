@@ -1,0 +1,5 @@
+bin/
+build/
+build_with_libs/
+kits/
+win32/
