@@ -395,10 +395,10 @@ check_result
 
 stage="Build MacOS binaries"
 # Set some required variables
-export CFLAGS="-g -O2 -arch x86_64 -arch arm64 -mmacosx-version-min=10.10"
-export CXX_FLAGS="-g -O2 -arch x86_64 -arch arm64 -mmacosx-version-min=10.10 -I/opt/osxcross/macports/pkgs/opt/local/libexec/boost/1.76/include"
+export CFLAGS="-g -O2 -arch x86_64 -arch arm64 -mmacosx-version-min=11.0 -I/opt/osxcross/macports/pkgs/opt/local/include"
+export CXX_FLAGS="-g -O2 -arch x86_64 -arch arm64 -mmacosx-version-min=11.0 -I/opt/osxcross/macports/pkgs/opt/local/libexec/boost/1.76/include"
 export CXXFLAGS=$CXX_FLAGS
-export LDFLAGS="-g -O2 -arch x86_64 -arch arm64 -L/opt/osxcross/macports/pkgs/opt/local/libexec/boost/1.76/lib"
+export LDFLAGS="-g -O2 -arch x86_64 -arch arm64 -L/opt/osxcross/macports/pkgs/opt/local/libexec/boost/1.76/lib -L/opt/osxcross/macports/pkgs/opt/local/lib"
 export CC="x86_64-apple-darwin20.2-cc"
 export CXX="x86_64-apple-darwin20.2-c++"
 export PREFIX="/usr/local/"
@@ -469,6 +469,7 @@ echo
 echo "#########################################################################"
 stage="osx zip"
 zip -qr9 ../kits/z88dk-osx-$date-$revision.zip z88dk
+
 
 echo "#########################################################################"
 echo
